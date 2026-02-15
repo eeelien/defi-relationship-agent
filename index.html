@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>DeFi Relationship Agent</title>
+
+<style>
+body{
+  font-family: Arial;
+  background:#0f172a;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.container{
+  background:#1e293b;
+  padding:30px;
+  border-radius:12px;
+  width:400px;
+  box-shadow:0 0 20px rgba(0,0,0,0.5);
+}
+
+h1{
+  text-align:center;
+  color:#38bdf8;
+}
+
+.chat{
+  height:200px;
+  overflow:auto;
+  background:#020617;
+  padding:10px;
+  margin-bottom:10px;
+  border-radius:8px;
+}
+
+input{
+  width:70%;
+  padding:10px;
+  border-radius:8px;
+  border:none;
+}
+
+button{
+  padding:10px;
+  border:none;
+  background:#38bdf8;
+  color:white;
+  border-radius:8px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>💸 DeFi Relationship Agent</h1>
+
+  <div id="chat" class="chat"></div>
+
+  <input id="input" placeholder="Ej: comprar bitcoin">
+  <button onclick="enviar()">Analizar</button>
+</div>
+
+<script>
+async function enviar(){
+  const input = document.getElementById("input").value
+
+  const res = await fetch("http://localhost:3000/analyze",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({message:input})
+  })
+
+  const data = await res.json()
+
+  document.getElementById("chat").innerHTML += `
+  <p>👤 ${input}</p>
+  <p>🤖 ${data.response}</p>
+  <hr>`
+}
+</script>
+
+</body>
+</html>
