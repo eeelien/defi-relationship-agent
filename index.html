@@ -1,40 +1,102 @@
-import express from "express"
-import cors from "cors"
-
-const app = express()
-
-app.use(cors())
-app.use(express.json())
-
-app.post("/analyze", (req, res) => {
-  const userMessage = req.body.message.toLowerCase()
-
-  const tipo = userMessage.includes("bitcoin") ? "bitcoin" :
-               userMessage.includes("nft") ? "nft" :
-               userMessage.includes("defi") ? "defi" : "otro"
-
-  function calcularRiesgo(tipo) {
-    switch(tipo){
-      case "bitcoin": return Math.floor(Math.random() * 21) + 30
-      case "nft": return Math.floor(Math.random() * 41) + 60
-      case "defi": return Math.floor(Math.random() * 31) + 50
-      default: return Math.floor(Math.random() * 21) + 40
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeFi Relationship Agent</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { background: #181c20; color: #fff; }
+    .container { margin-top: 40px; }
+    .card { background: #23272b; border: none; }
+    .form-control, .btn { border-radius: 0.5rem; }
+    #price { font-size: 2rem; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="mb-4">💸 DeFi Relationship Agent</h1>
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="card p-4 mb-3">
+          <h4>Precio Bitcoin (USD)</h4>
+          <div id="price">Cargando...</div>
+        </div>
+        <div class="card p-4">
+          <h4>Consulta al Agente IA</h4>
+          <form id="ia-form">
+            <input type="text" id="user-message" class="form-control mb-2" placeholder="Ej: ¿Es buen momento para comprar Bitcoin?" required>
+            <button type="submit" class="btn btn-primary w-100">Preguntar</button>
+          </form>
+          <div id="ia-response" class="mt-3"></div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card p-4">
+          <h4>Gráfico de Bitcoin (USD)</h4>
+          <canvas id="btcChart" height="300"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Mostrar precio de Bitcoin en tiempo real
+    async function fetchPrice() {
+      try {
+        const res = await fetch('/price');
+        const data = await res.json();
+        document.getElementById('price').textContent = data.price ? `$${data.price}` : 'Error';
+      } catch {
+        document.getElementById('price').textContent = 'Error';
+      }
     }
-  }
+    fetchPrice();
+    setInterval(fetchPrice, 10000); // Actualiza cada 10s
 
-  const riesgo = calcularRiesgo(tipo)
+    // Consulta al agente IA
+    document.getElementById('ia-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('user-message').value;
+      const res = await fetch('/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg })
+      });
+      const data = await res.json();
+      document.getElementById('ia-response').textContent = data.respuesta || 'Error';
+    });
 
-  const response = `
-🔥 ${tipo.toUpperCase()} detectado
-💰 Riesgo: ${riesgo}/100
-🧠 Consejo: Mantén estrategia y controla emociones.
-  `
-
-  console.log("Decision logged:", userMessage)
-
-  res.json({response})
-})
-
-app.listen(3000, () => {
-  console.log("🚀 DeFi Relationship Agent corriendo en http://localhost:3000")
-})
+    // Gráfico de precio de Bitcoin
+    let btcChart;
+    async function fetchChartData() {
+      try {
+        const res = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=1');
+        const data = await res.json();
+        const labels = data.prices.map(p => new Date(p[0]).toLocaleTimeString());
+        const prices = data.prices.map(p => p[1]);
+        if (btcChart) btcChart.destroy();
+        btcChart = new Chart(document.getElementById('btcChart').getContext('2d'), {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [{
+              label: 'BTC/USD',
+              data: prices,
+              borderColor: '#f2a900',
+              backgroundColor: 'rgba(242,169,0,0.1)',
+              tension: 0.2
+            }]
+          },
+          options: {
+            plugins: { legend: { labels: { color: '#fff' } } },
+            scales: { x: { ticks: { color: '#fff' } }, y: { ticks: { color: '#fff' } } }
+          }
+        });
+      } catch {}
+    }
+    fetchChartData();
+    setInterval(fetchChartData, 60000); // Actualiza cada minuto
+  </script>
+</body>
+</html>

@@ -1,16 +1,7 @@
-{
-  "name": "defi-agent",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "cors": "^2.8.6",
-    "express": "^5.2.1"
-  }
-}
+git init          # si aún no lo hiciste
+git add .
+git commit -m "Demo lista de DeFi Agent"
+git branch -M main
+git remote add origin TU_URL_DE_GITHUB
+git push -u origin main
+
