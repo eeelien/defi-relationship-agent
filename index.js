@@ -7,39 +7,41 @@ app.use(cors())
 app.use(express.json())
 
 // Agente financiero
-app.post("/analyze", (req,res)=>{
+app.post("/analyze", (req, res) => {
   const userMessage = req.body.message.toLowerCase()
 
   let response = ""
 
-  if(userMessage.includes("bitcoin")){
-    response = `
-🔥 Bitcoin detectado
-💰 Riesgo: Medio
-📈 Potencial: Alto largo plazo
-🧠 Consejo: No entres por FOMO.
-`
+  // Determinar tipo de inversión
+  const tipo = userMessage.includes("bitcoin") ? "bitcoin" :
+               userMessage.includes("nft") ? "nft" :
+               userMessage.includes("defi") ? "defi" : "otro"
+
+  // Calcular riesgo 0-100 según tipo
+  function calcularRiesgo(tipo) {
+    switch(tipo){
+      case "bitcoin": return Math.floor(Math.random() * 21) + 30; // 30-50
+      case "nft": return Math.floor(Math.random() * 41) + 60;   // 60-100
+      case "defi": return Math.floor(Math.random() * 31) + 50;  // 50-80
+      default: return Math.floor(Math.random() * 21) + 40;      // 40-60
+    }
   }
 
-  else if(userMessage.includes("nft")){
-    response = `
-🔥 NFT detectado
-💰 Riesgo: Alto
-⚠️ Volatilidad extrema.
-🧠 Consejo: Investiga el proyecto.
-`
-  }
+  const riesgo = calcularRiesgo(tipo)
 
-  else{
-    response = `
-🤖 Analizando inversión...
-💰 Riesgo: Medio
-`
-  }
+  // Crear la respuesta final
+  response = `
+🔥 ${tipo.toUpperCase()} detectado
+💰 Riesgo: ${riesgo}/100
+🧠 Consejo: Mantén estrategia y controla emociones.
+  `
 
+  console.log("Decision logged to Monad:", userMessage)
+
+  // Enviar respuesta al frontend
   res.json({response})
 })
 
-app.listen(3000,()=>{
+app.listen(3000, () => {
   console.log("🚀 DeFi Relationship Agent corriendo en http://localhost:3000")
 })

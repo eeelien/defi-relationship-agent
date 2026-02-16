@@ -1,88 +1,40 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>DeFi Relationship Agent</title>
+import express from "express"
+import cors from "cors"
 
-<style>
-body{
-  font-family: Arial;
-  background:#0f172a;
-  color:white;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-}
+const app = express()
 
-.container{
-  background:#1e293b;
-  padding:30px;
-  border-radius:12px;
-  width:400px;
-  box-shadow:0 0 20px rgba(0,0,0,0.5);
-}
+app.use(cors())
+app.use(express.json())
 
-h1{
-  text-align:center;
-  color:#38bdf8;
-}
+app.post("/analyze", (req, res) => {
+  const userMessage = req.body.message.toLowerCase()
 
-.chat{
-  height:200px;
-  overflow:auto;
-  background:#020617;
-  padding:10px;
-  margin-bottom:10px;
-  border-radius:8px;
-}
+  const tipo = userMessage.includes("bitcoin") ? "bitcoin" :
+               userMessage.includes("nft") ? "nft" :
+               userMessage.includes("defi") ? "defi" : "otro"
 
-input{
-  width:70%;
-  padding:10px;
-  border-radius:8px;
-  border:none;
-}
+  function calcularRiesgo(tipo) {
+    switch(tipo){
+      case "bitcoin": return Math.floor(Math.random() * 21) + 30
+      case "nft": return Math.floor(Math.random() * 41) + 60
+      case "defi": return Math.floor(Math.random() * 31) + 50
+      default: return Math.floor(Math.random() * 21) + 40
+    }
+  }
 
-button{
-  padding:10px;
-  border:none;
-  background:#38bdf8;
-  color:white;
-  border-radius:8px;
-  cursor:pointer;
-}
-</style>
-</head>
+  const riesgo = calcularRiesgo(tipo)
 
-<body>
+  const response = `
+🔥 ${tipo.toUpperCase()} detectado
+💰 Riesgo: ${riesgo}/100
+🧠 Consejo: Mantén estrategia y controla emociones.
+  `
 
-<div class="container">
-  <h1>💸 DeFi Relationship Agent</h1>
+  console.log("Decision logged:", userMessage)
 
-  <div id="chat" class="chat"></div>
+  res.json({response})
+})
 
-  <input id="input" placeholder="Ej: comprar bitcoin">
-  <button onclick="enviar()">Analizar</button>
-</div>
-
-<script>
-async function enviar(){
-  const input = document.getElementById("input").value
-
-  const res = await fetch("http://localhost:3000/analyze",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({message:input})
-  })
-
-  const data = await res.json()
-
-  document.getElementById("chat").innerHTML += `
-  <p>👤 ${input}</p>
-  <p>🤖 ${data.response}</p>
-  <hr>`
-}
-</script>
-
-</body>
-</html>
+app.listen(3000, () => {
+  console.log("🚀 DeFi Relationship Agent corriendo en http://localhost:3000")
+})
